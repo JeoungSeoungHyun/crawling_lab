@@ -5,8 +5,7 @@ import datetime
 from lib2to3.pgen2 import driver
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
-# from mariadb_test import *
-from pymysql_test import *
+from mariadb_test import *
 
 # 크롬창 열기
 driver = wd.Chrome(executable_path="chromedriver.exe")
@@ -85,20 +84,23 @@ def check_date(date_string):  # 실제 날짜 구하는 함수
 
 # dict으로 변경하기 위한 키값 튜플
 keys = ('title', 'url', 'img', 'date')
-starttime = time.time()
+list = []
 # 정보 읽어오기
 i = 0
-list = []
+starttime = time.time()
 while True:
     # for i in range(1, 11):
     try:
         i += 1
         # dict으로 바꿔서 세이브 => bulk insert 처리 필요 / 필터링 필요 / 빅데이터? 처리 필요
-        list.append(dict(zip(keys, findEle(i))))
+        list.append(findEle(i))
     except:
         break
+middletime = time.time()
+save_many(list)
+conn.commit()
+conn.close()
 endtime = time.time()
-save(list)
-# conn.commit()
-# conn.close()
-print('시간 :', endtime-starttime)
+worktime = endtime-starttime
+print("middletime :", endtime-middletime)
+print("time : ", worktime)
