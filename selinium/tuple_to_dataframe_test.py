@@ -6,16 +6,19 @@
 import pandas as pd
 import time
 import datetime
-from lib2to3.pgen2 import driver
+# from lib2to3.pgen2 import driver
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 from mariadb_test import *
+# from pymysql_test import *
 
 
 # 크롬창 열기
-driver = wd.Chrome(executable_path="chromedriver.exe")
+options = wd.ChromeOptions()
+options.add_experimental_option("excludeSwitches",["enable-logging"])
+driver = wd.Chrome(executable_path="chromedriver.exe",options=options)
 # 로직이 바로 안찾아지는 경우 10초 대기
-driver.implicitly_wait(10)  # seconds
+# driver.implicitly_wait(10)  # seconds
 
 # 특정날짜지정하여 찾아오기
 url = "https://search.naver.com/search.naver?where=blog&query=김치찌개레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
