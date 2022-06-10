@@ -1,9 +1,10 @@
 # python -m pip install selenium
 
-import multiprocessing
+from multiprocessing import Pool
 import time
 import datetime
 from lib2to3.pgen2 import driver
+from matplotlib.pyplot import title
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 from mariadb_test import *
@@ -12,9 +13,8 @@ from mariadb_test import *
 
 # 크롬창 열기
 options = wd.ChromeOptions()
-# options.headless= True
-options.add_experimental_option("excludeSwitches",["enable-logging"])
-driver = wd.Chrome(executable_path="chromedriver.exe",options=options)
+options.add_experimental_option("excludeSwitches", ["enable-logging"])
+driver = wd.Chrome(executable_path="chromedriver.exe", options=options)
 # 로직이 바로 안찾아지는 경우 10초 대기
 # driver.implicitly_wait(10)  # seconds
 
@@ -50,42 +50,39 @@ while True:
     else:
         last_height = new_height
         count = 0
-        
 
-def findEle(i):  # 원하는 값을 찾는 함수
-    # print(i)
-    # t1 = time.time()
-    el = driver.find_element(By.ID, f'sp_blog_{i}')
-    # t2 = time.time()
-    # print('li 찾는시간 :', t2-t1)
-    element = el.find_element(By.CLASS_NAME, 'api_txt_lines')
-    # t3 = time.time()
-    # print('엘레멘트 찾는시간 :', t3-t2)
-    title = element.text
-    # t4 = time.time()
-    # print('타이틀 찾는시간 :', t4-t3)
-    try:
-        imgTag = el.find_element(By.CLASS_NAME, 'api_get')
-        img = imgTag.get_attribute('src')
-        # t5 = time.time()
-        # print('이미지 찾는시간 :', t5-t4)
+
+def find_li(i):  # 하나의 게시글을 찾는 함수
+    return driver.find_element(By.ID, f'sp_blog_{i}')
+
+
+def find_m_el(li):  # 게시글의 정보가 담긴 상위 element 찾는 함수
+    return li.find_element(By.CLASS_NAME, 'api_txt_lines')
+
+
+def find_title(li):  # 게시글의 제목을 찾는 함수
+    return find_m_el(li).text
+
+
+def find_img(li):  # 게시글의 이미지 url을 찾는 함수
+    try:  # 이미지가 없는 경우가 있기 때문에 try_except 사용
+        return li.find_element(By.CLASS_NAME, 'api_get').get_attribute('src')
     except:
-        img = None
-    url = element.get_attribute('href')
-    # t6 = time.time()
-    # print('url 찾는시간 :', t6-t5)
-    date = check_date(el.find_element(By.CLASS_NAME, 'sub_time').text)
-    # t7 = time.time()
-    # print('날짜 찾는시간 :', t7-t6)
-    return title, url, img, date
+        return None
 
 
-def get_now_timestamp():  # 현재 시간을 timestamp로 구하는 함수
-    return datetime.datetime.now().timestamp()
+def find_url(li):  # 게시글의 url을 찾는 함수
+    return find_m_el(li).get_attribute('href')
+
+
+def format_date(date_string):  # 날짜 포맷 함수
+    format = '%Y-%m-%d'
+    replace_date = date_string.replace('.', '-')
+    return datetime.datetime.strptime(replace_date[:-1], format)
 
 
 def check_date(date_string):  # 실제 날짜 구하는 함수
-    now_timestamp = get_now_timestamp()
+    now_timestamp = datetime.datetime.now().timestamp()
     if '어제' in date_string:
         real_timestamp = now_timestamp - 86400
     elif '일' in date_string:
@@ -94,45 +91,29 @@ def check_date(date_string):  # 실제 날짜 구하는 함수
     elif '시간' in date_string or '분' in date_string or '방금' in date_string:
         real_timestamp = now_timestamp
     else:
-        format = '%Y-%m-%d'
-        replace_date = date_string.replace('.', '-')
-        parse_date = datetime.datetime.strptime(replace_date[:-1], format)
-        real_timestamp = time.mktime(parse_date.timetuple())
+        real_timestamp = time.mktime(format_date(date_string).timetuple())
     return datetime.date.fromtimestamp(real_timestamp)
 
-# i=0
-# t1 = time.time()
-# while True:
-#     try:
-#         i +=1
-#         el = driver.find_element(By.ID, f'sp_blog_{i}')
-#     except:
-#         break
-# t2 = time.time()
-# print('count 시간 : ',t2-t1)
-# print('총 개수 : ',i-1)
-# driver.close()
-# # dict으로 변경하기 위한 키값 튜플
-# keys = ('title', 'url', 'img', 'date')
-# starttime = time.time()
+
+def find_date(li):  # 게시글의 게시일을 찾는 함수
+    return check_date(li.find_element(By.CLASS_NAME, 'sub_time').text)
 
 
-# 정보 읽어오기
-if __name__ == '__main__':
-    i=0
-    count = 390
-    pool = multiprocessing.Pool(processes=2)
-    coli = []
-    t1 = time.time()
-    for i in range(count):
-        coli.append(str(i))
-    pool.map(findEle(i),coli)
-    t2 = time.time()
-    print('멀티 시간 :',t2-t1)
-    driver.close()
+def find_info(i):
+    li = find_li(i)
+    title = find_title(li)
+    img = find_img(li)
+    url = find_url(li)
+    date = find_date(li)
+    return title, img, url, date
 
+
+i = 0
+keys = {'title', 'url', 'img', 'date'}
+list_num = []
+starttime = time.time()
 while True:
-# for i in range(1, 11):
+    # for i in range(1, 11):
     try:
         i += 1
         # dict으로 바꿔서 세이브 => bulk insert 처리 필요 / 필터링 필요 / 빅데이터? 처리 필요
@@ -140,16 +121,23 @@ while True:
         # save(findEle(i))
         # save(**dict(zip(keys, findEle(i))))
         # list.append(dict(zip(keys, findEle(i))))
-        list.append(findEle(i))
+        find_li(i)
+        list_num.append(i)
     except:
         break
-# df = pd.DataFrame(list, columns=['title', 'url', 'img', 'date'])
-middletime = time.time()
-# save(list)
-save_many(list)
-endtime = time.time()
-conn.commit()
-conn.close()
-print('전반시간 :', middletime -starttime)
-print('후반시간 :', endtime -middletime)
-print('총시간 :', endtime-starttime)
+middletime1 = time.time()
+
+if __name__ == '__main__':
+    pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
+    # list_info = pool.map(find_info, list_num)  # pool에 일을 던져줍니다.
+    middletime2 = time.time()
+    pool.map(save, list_num)
+    # save_many(list_info)
+    conn.commit()
+    conn.close()
+
+    endtime = time.time()
+    print('list 생성 소요 시간 ; ', middletime1 - starttime)
+    print('info 생성 소요 시간 : ', middletime2 - middletime1)
+    print('save 소요 시간 : ', endtime - middletime2)
+    print('총 소요 시간 : ', endtime-starttime)

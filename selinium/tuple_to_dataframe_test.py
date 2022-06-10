@@ -15,8 +15,8 @@ from mariadb_test import *
 
 # 크롬창 열기
 options = wd.ChromeOptions()
-options.add_experimental_option("excludeSwitches",["enable-logging"])
-driver = wd.Chrome(executable_path="chromedriver.exe",options=options)
+options.add_experimental_option("excludeSwitches", ["enable-logging"])
+driver = wd.Chrome(executable_path="chromedriver.exe", options=options)
 # 로직이 바로 안찾아지는 경우 10초 대기
 # driver.implicitly_wait(10)  # seconds
 
@@ -107,5 +107,6 @@ df = pd.DataFrame(list, columns=['title', 'url', 'img', 'date'])
 middletime = time.time()
 save_bulk(df)
 endtime = time.time()
-print('중간타임 : ', endtime - middletime)
-print('최종타임 : ', endtime - starttime)
+print('dataframe 생성 시간 : ', middletime - starttime)
+print('save 소요 시간 : ', endtime - middletime)
+print('총 소요 시간 : ', endtime - starttime)
