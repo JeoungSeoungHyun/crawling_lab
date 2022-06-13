@@ -19,8 +19,6 @@ driver = wd.Chrome(executable_path="chromedriver.exe", options=options)
 # 로직이 바로 안찾아지는 경우 10초 대기
 # driver.implicitly_wait(10)  # seconds
 
-list_food = ['김치볶음밥', '김치찌개', '된장찌개']
-
 
 def open_browser(food):
     # 드라이버 열기
@@ -28,7 +26,7 @@ def open_browser(food):
     url = f"https://search.naver.com/search.naver?where=blog&query={food}레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
 
     # 검색어 지정하여 찾아오기
-    # url = "https://search.naver.com/search.naver?query=김치찌개 레시피&nso=&where=blog&sm=tab_opt"
+    # url = f"https://search.naver.com/search.naver?query={food} 레시피&nso=&where=blog&sm=tab_opt"
     driver.get(url)
     # 최하단까지 스크롤 읽기
     SCROLL_PAUSE_SEC = 1
@@ -114,11 +112,10 @@ def find_info(i):
     return title, img, url, date
 
 
-starttime = time.time()
-for food in list_food:
+def save_food(food):
+    list_info = []
     middletime1 = time.time()
     i = 0
-    list_info = []
     open_browser(food)
     while True:
         try:
@@ -127,12 +124,25 @@ for food in list_food:
         except:
             break
     middletime2 = time.time()
-    save_many(list_info)
-    conn.commit()
-    middletime3 = time.time()
     print(food, "list_info 생성시간 : ", middletime2 - middletime1)
-    print(food, " save 시간 : ", middletime3-middletime2)
+    print('리스트 사이즈', list_info.__len__())
+    return list_info
 
-conn.close()
-endtime = time.time()
-print("총 소요시간 : ", endtime - starttime)
+
+# save_food('김치볶음밥')
+# conn.close()
+
+if __name__ == "__main__":
+    list_food = ['김치볶음밥', '계란볶음밥', '김치찌개', '된장찌개']
+    starttime = time.time()
+    pool = Pool(processes=5)
+    result = pool.map(save_food, list_food)
+    print('result 사이즈', result.__len__())
+    middletime3 = time.time()
+    for i in range(result.__len__()):
+        save_many(result[i])
+    conn.commit()
+    conn.close()
+    endtime = time.time()
+    print("save 시간 : ", endtime-middletime3)
+    print("총 소요시간 : ", endtime - starttime)

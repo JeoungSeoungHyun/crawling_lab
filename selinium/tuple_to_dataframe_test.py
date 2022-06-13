@@ -93,15 +93,7 @@ def check_date(date_string):  # 실제 날짜 구하는 함수
     return datetime.date.fromtimestamp(real_timestamp)
 
 
-def do_thread_crawl(urls: list):  # 멀티 쓰레드
-    list = []
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        for url in urls:
-            list.append(executor.submit(do_html_crawl, url))
-        for execution in concurrent.futures.as_completed(list):
-            execution.result()
-
-
+list = []
 # dict으로 변경하기 위한 키값 튜플
 keys = ('title', 'url', 'img', 'date')
 # 정보 읽어오기

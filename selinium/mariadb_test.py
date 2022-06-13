@@ -41,7 +41,7 @@ def save(**data):
 
 
 def save_many(list):
-    # print(type(list))
+    print(type(list))
     # print(type(list[0]))
     # print(list[0])
     print(list.__len__(), "개")
