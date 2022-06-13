@@ -3,6 +3,7 @@
 # python -m pip install SQLAlchemy
 # python -m pip install mysql
 
+
 import pandas as pd
 import time
 import datetime
@@ -11,6 +12,8 @@ from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 from mariadb_test import *
 # from pymysql_test import *
+from concurrent.futures import ThreadPoolExecutor  # 멀티쓰레드 import
+import concurrent.futures  # 멀티쓰레드 import
 
 
 # 크롬창 열기
@@ -90,11 +93,19 @@ def check_date(date_string):  # 실제 날짜 구하는 함수
     return datetime.date.fromtimestamp(real_timestamp)
 
 
+def do_thread_crawl(urls: list):  # 멀티 쓰레드
+    list = []
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        for url in urls:
+            list.append(executor.submit(do_html_crawl, url))
+        for execution in concurrent.futures.as_completed(list):
+            execution.result()
+
+
 # dict으로 변경하기 위한 키값 튜플
 keys = ('title', 'url', 'img', 'date')
 # 정보 읽어오기
 i = 0
-list = []
 starttime = time.time()
 while True:
     try:

@@ -17,10 +17,10 @@ try:
         password="green1234",
         host="localhost",
         port=3306,
-        database="greendb"
+        database="greendb3"
     )
     engine = create_engine(
-        "mysql://{user}:{pw}@localhost/{db}".format(user='green', pw='green1234', db='greendb'))
+        "mysql://{user}:{pw}@localhost/{db}".format(user='green', pw='green1234', db='greendb3'))
 except mariadb.Error as e:
     print(f"Error connecting to MariaDB Platform: {e}")
     sys.ext(1)

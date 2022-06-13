@@ -11,17 +11,25 @@ from mariadb_test import *
 # from pymysql_test import *
 # import pandas as pd
 from concurrent.futures import ThreadPoolExecutor  # 멀티쓰레드 import
-import concurrent.futures  # 멀티쓰레드 import
 
-# 크롬창 열기
+# 드라이버 옵션 열기
 options = wd.ChromeOptions()
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
 driver = wd.Chrome(executable_path="chromedriver.exe", options=options)
 # 로직이 바로 안찾아지는 경우 10초 대기
 # driver.implicitly_wait(10)  # seconds
 
+list_food = ['김치볶음밥', '김치찌개', '된장찌개']
 
-def scroll():
+
+def open_browser(food):
+    # 드라이버 열기
+    # 특정날짜지정하여 찾아오기
+    url = f"https://search.naver.com/search.naver?where=blog&query={food}레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
+
+    # 검색어 지정하여 찾아오기
+    # url = "https://search.naver.com/search.naver?query=김치찌개 레시피&nso=&where=blog&sm=tab_opt"
+    driver.get(url)
     # 최하단까지 스크롤 읽기
     SCROLL_PAUSE_SEC = 1
     count = 0
@@ -48,19 +56,6 @@ def scroll():
         else:
             last_height = new_height
             count = 0
-
-
-list_food = ['김치볶음밥', '김치찌개', '된장찌개']
-
-for food in list_food:
-    # 특정날짜지정하여 찾아오기
-    # url = "https://search.naver.com/search.naver?where=blog&query=김치찌개레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
-
-    # 검색어 지정하여 찾아오기
-    url = f"https://search.naver.com/search.naver?query={food} 레시피&nso=&where=blog&sm=tab_opt"
-    print(url)
-    driver.get(url)
-    scroll()
 
 
 def find_li(i):  # 하나의 게시글을 찾는 함수
@@ -119,38 +114,25 @@ def find_info(i):
     return title, img, url, date
 
 
-i = 0
-keys = {'title', 'url', 'img', 'date'}
-list_num = []
 starttime = time.time()
-
-
-def find_list(url):
+for food in list_food:
+    middletime1 = time.time()
+    i = 0
+    list_info = []
+    open_browser(food)
     while True:
-        # for i in range(1, 11):
         try:
             i += 1
-            # dict으로 바꿔서 세이브 => bulk insert 처리 필요 / 필터링 필요 / 빅데이터? 처리 필요
-            # print(i)
-            # save(findEle(i))
-            # save(**dict(zip(keys, findEle(i))))
-            # list.append(dict(zip(keys, findEle(i))))
-            find_li(i)
-            list_num.append(i)
+            list_info.append(find_info(i))
         except:
             break
-    middletime1 = time.time()
-
-
-if __name__ == '__main__':
-    pool = Pool(processes=4)  # 4개의 프로세스를 사용합니다.
-    list_info = pool.map(find_list, list_food)  # pool에 일을 던져줍니다.
     middletime2 = time.time()
     save_many(list_info)
     conn.commit()
-    conn.close()
-    endtime = time.time()
-    print('list[i] 생성 소요 시간 ; ', middletime1 - starttime)
-    print('list_info 생성 소요 시간 : ', middletime2 - middletime1)
-    print('save 소요 시간 : ', endtime - middletime2)
-    print('총 소요 시간 : ', endtime-starttime)
+    middletime3 = time.time()
+    print(food, "list_info 생성시간 : ", middletime2 - middletime1)
+    print(food, " save 시간 : ", middletime3-middletime2)
+
+conn.close()
+endtime = time.time()
+print("총 소요시간 : ", endtime - starttime)
