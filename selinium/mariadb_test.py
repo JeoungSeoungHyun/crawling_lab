@@ -41,14 +41,13 @@ def save(**data):
 
 
 def save_many(list):
-    print(type(list))
-    # print(type(list[0]))
-    # print(list[0])
     print(list.__len__(), "개")
-    sql = "INSERT INTO post (title,img,url,date) VALUES (%s,%s,%s,%s)"
+    sql = "INSERT INTO post (title,img,url,date,foodId) VALUES (%s,%s,%s,%s,%s)"
+    # sql = f"INSERT INTO post (title,img,url,date,foodId) VALUES (%s,%s,%s,%s,%s,{foodId})"
     try:
         cursor.executemany(sql, list)
     except Exception as e:
+        print('쿼리 :', sql)
         print(e)
         conn.rollback()
         return -1
@@ -59,3 +58,10 @@ def save_bulk(df):
     print(df)
     df.to_sql('post', engine, if_exists='replace',
               chunksize=1000, method='multi')
+
+
+def find_all(table):
+    sql = "SELECT * FROM " + table
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    return rows

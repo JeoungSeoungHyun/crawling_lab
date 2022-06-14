@@ -23,10 +23,10 @@ driver = wd.Chrome(executable_path="chromedriver.exe", options=options)
 def open_browser(food):
     # 드라이버 열기
     # 특정날짜지정하여 찾아오기
-    url = f"https://search.naver.com/search.naver?where=blog&query={food}레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
+    # url = f"https://search.naver.com/search.naver?where=blog&query={food} 레시피&sm=tab_opt&nso=so:r,p:from20220520to20220527"
 
     # 검색어 지정하여 찾아오기
-    # url = f"https://search.naver.com/search.naver?query={food} 레시피&nso=&where=blog&sm=tab_opt"
+    url = f"https://search.naver.com/search.naver?query={food} 레시피&nso=&where=blog&sm=tab_opt"
     driver.get(url)
     # 최하단까지 스크롤 읽기
     SCROLL_PAUSE_SEC = 1
@@ -103,13 +103,35 @@ def find_date(li):  # 게시글의 게시일을 찾는 함수
     return check_date(li.find_element(By.CLASS_NAME, 'sub_time').text)
 
 
-def find_info(i):
+def compare(food, title):
+    isRight = True
+    str_list = list(food)
+    for str in str_list:
+        if str in title:
+            isRight = True
+        else:
+            isRight = False
+            break
+    return isRight
+
+
+def find_info(i, foodId, food):
     li = find_li(i)
     title = find_title(li)
-    img = find_img(li)
-    url = find_url(li)
-    date = find_date(li)
-    return title, img, url, date
+    # 제목에 음식 이름이 들어가는 경우만 골라낸다
+    if(compare(food, title)):
+        img = find_img(li)
+        url = find_url(li)
+        date = find_date(li)
+        return title, img, url, date, foodId
+
+
+data_food = find_all('food')
+# 테스트용 데이터
+# data_food = [(1, '계란볶음밥', 1), (2, '김치볶음밥', 2)]
+
+# tuple to dict
+dict_data_food = dict((y, x) for x, y, z in data_food)
 
 
 def save_food(food):
@@ -120,7 +142,12 @@ def save_food(food):
     while True:
         try:
             i += 1
-            list_info.append(find_info(i))
+            info = find_info(i, dict_data_food[food], food)
+            # 타이틀에 음식 이름이 없는 내용은 제외한다. 이 때 None이 return되기 때문에 break를 발생
+            if info != None:
+                list_info.append(info)
+            else:
+                break
         except:
             break
     middletime2 = time.time()
@@ -129,18 +156,20 @@ def save_food(food):
     return list_info
 
 
-# save_food('김치볶음밥')
-# conn.close()
-
 if __name__ == "__main__":
-    list_food = ['김치볶음밥', '계란볶음밥', '김치찌개', '된장찌개']
+    list_food = []
+    # dict의 key를 꺼내는 방법
+    for key in dict_data_food:
+        list_food.append(key)
     starttime = time.time()
-    pool = Pool(processes=5)
+    pool = Pool(processes=4)
     result = pool.map(save_food, list_food)
     print('result 사이즈', result.__len__())
     middletime3 = time.time()
     for i in range(result.__len__()):
-        save_many(result[i])
+        if(result[i].__len__() != 0):
+            print(result[i])
+            save_many(result[i])
     conn.commit()
     conn.close()
     endtime = time.time()
