@@ -2,7 +2,6 @@
 
 import time
 import datetime
-from lib2to3.pgen2 import driver
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 from mariadb_test import *

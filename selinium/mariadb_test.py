@@ -42,8 +42,9 @@ def save(**data):
 
 def save_many(list):
     print(list.__len__(), "개")
-    sql = "INSERT INTO post (title,img,url,date,foodId) VALUES (%s,%s,%s,%s,%s)"
-    # sql = f"INSERT INTO post (title,img,url,date,foodId) VALUES (%s,%s,%s,%s,%s,{foodId})"
+    sql = "INSERT INTO post (title,thumnail,url,postDate,foodId) VALUES (%s,%s,%s,%s,%s)"
+    # 아래처럼은 바인딩이 안된다..
+    # sql = f"INSERT INTO post (title,thumnail,url,date,foodId) VALUES (%s,%s,%s,%s,%s,{foodId})"
     try:
         cursor.executemany(sql, list)
     except Exception as e:

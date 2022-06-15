@@ -1,4 +1,4 @@
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool
 import time
 
 

@@ -1,28 +1,5 @@
 from mariadb_test import *
 
-mlist = [
-    ('1', '2', '3'),
-    ('4', '5', '6'),
-    ('7', '8', '9')
-]
-sql = ""
-
-
-def make(data):
-    global sql
-    print(data)
-    sql = sql + data[0]
-    sql = sql + data[1]
-    sql = sql + data[2]
-    print(sql)
-
-
-for i in range(0, mlist.__len__()):
-    make(mlist[i])
-#     sql = sql + list[i][0]
-#     sql = sql + list[i][1]
-#     sql = sql + list[i][2]
-#     print(sql)
 
 mmlist = [1, 2, 3, 4]
 for i in range(mmlist.__len__()):
@@ -32,19 +9,20 @@ for i in range(mmlist.__len__()):
 result = find_all('food')
 # tuple to dict
 result_dict = dict((y, x) for x, y, z in result)
-
 # print(result_dict)
 # print(result_dict['계란볶음밥'])
+
 # dict의 key를 꺼내는 방법
-# for key in result_dict:
-#     print(key)
+for key in result_dict:
+    print(key)
 
-# dict의 value를 꺼내는 방법
-# for value in result_dict.values():
-#     print(value)
+# dict의 value를 꺼내는 방법1
+for value in result_dict.values():
+    print(value)
 
-# for value in (result_dict.values()):
-#     print(value)
+# dict의 value를 꺼내는 방법2
+for value in (result_dict.values()):
+    print(value)
 
 
 str = '계란 볶음밥'
@@ -66,3 +44,17 @@ r3 = str.split('계')
 print('r1 : ', r1)
 print('r2 : ', r2)
 print('r3 : ', r3)
+
+# tuple 을 가진 list 하나의 리스트로 바꾸기
+mmmlist = [(1, 2, 3), (4, 5, 6)]
+
+mmlist = []
+
+mmlist.append(mmmlist[0][0])
+mmlist.append(mmmlist[0][1])
+mmlist.append(mmmlist[0][2])
+print(mmlist)
+mmlist.append(mmmlist[1][0])
+mmlist.append(mmmlist[1][1])
+mmlist.append(mmmlist[1][2])
+print(mmlist)
