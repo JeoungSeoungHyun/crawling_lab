@@ -1,4 +1,4 @@
-from mariadb_test import *
+from db import *
 
 
 mmlist = [1, 2, 3, 4]

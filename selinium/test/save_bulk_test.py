@@ -105,6 +105,7 @@ while True:
         list.append(dict(zip(keys, findEle(i))))
     except:
         break
+# 벌크 insert를 위해서는 dataFrame으로 변경
 df = pd.DataFrame(list, columns=['title', 'url', 'img', 'date'])
 # print(df)
 middletime = time.time()

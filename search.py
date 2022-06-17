@@ -9,7 +9,7 @@ from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 
 # db와의 연결 위한 import
-from mariadb_test import *
+from db import *
 
 # 시간 측정 위한 import
 import time

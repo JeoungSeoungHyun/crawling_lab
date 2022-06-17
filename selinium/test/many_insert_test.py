@@ -4,7 +4,7 @@ import time
 import datetime
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
-from mariadb_test import *
+from db import *
 
 # 크롬창 열기
 driver = wd.Chrome(executable_path="chromedriver.exe")

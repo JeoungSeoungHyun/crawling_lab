@@ -7,7 +7,7 @@ from lib2to3.pgen2 import driver
 from matplotlib.pyplot import title
 from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
-from mariadb_test import *
+from db import *
 # from pymysql_test import *
 # import pandas as pd
 from concurrent.futures import ThreadPoolExecutor  # 멀티쓰레드 import
